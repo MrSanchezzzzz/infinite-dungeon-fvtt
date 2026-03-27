@@ -2,10 +2,10 @@
   "id": "infinite-dungeon",
   "title": "Infinite Dungeon",
   "description": "A Foundry VTT module scaffold for building an endless dungeon experience.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [
     {
-      "name": "Infinite Dungeon Contributors"
+      "name": "MrSanchezzzzz"
     }
   ],
   "esmodules": [

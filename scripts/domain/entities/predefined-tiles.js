@@ -4,6 +4,7 @@ export const PREDEFINED_TILE_DEFINITIONS = Object.freeze([
   Object.freeze({ type: TileType.Entrance, position: TilePosition.Entrance }),
   Object.freeze({ type: TileType.Battle, position: TilePosition.Inside }),
   Object.freeze({ type: TileType.Elite, position: TilePosition.Inside }),
+  Object.freeze({ type: TileType.Boss, position: TilePosition.Edges }),
   Object.freeze({ type: TileType.Relic, position: TilePosition.Edges }),
   Object.freeze({ type: TileType.Change, position: TilePosition.Edges }),
   Object.freeze({ type: TileType.Shop, position: TilePosition.Edges }),
