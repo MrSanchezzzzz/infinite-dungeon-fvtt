@@ -1,0 +1,30 @@
+{
+  "id": "infinite-dungeon",
+  "title": "Infinite Dungeon",
+  "description": "A Foundry VTT module scaffold for building an endless dungeon experience.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Infinite Dungeon Contributors"
+    }
+  ],
+  "esmodules": [
+    "scripts/infinite-dungeon.js"
+  ],
+  "styles": [
+    "styles/infinite-dungeon.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "license": "LICENSE",
+  "readme": "README.md"
+}
