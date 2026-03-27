@@ -21,6 +21,14 @@
       "path": "lang/en.json"
     }
   ],
+  "packs": [
+    {
+      "name": "infinite-dungeon-decks",
+      "label": "Infinite Dungeon Decks",
+      "path": "packs/infinite-dungeon-decks",
+      "type": "Cards"
+    }
+  ],
   "compatibility": {
     "minimum": "12",
     "verified": "13"
