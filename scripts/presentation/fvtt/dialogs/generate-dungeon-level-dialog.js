@@ -1,30 +1,68 @@
-import { TileType } from "../../../domain/index.js";
+import { PREDEFINED_TILE_COUNT_PRESETS, TileType } from "../../../domain/index.js";
 
 const TILE_TYPES = Object.freeze(Object.values(TileType));
-const DEFAULT_COUNT_BY_TYPE = Object.freeze({
-  [TileType.Entrance]: 1,
-  [TileType.Battle]: 0,
-  [TileType.Elite]: 0,
-  [TileType.Boss]: 1,
-  [TileType.Relic]: 0,
-  [TileType.Change]: 0,
-  [TileType.Shop]: 0,
-  [TileType.Event]: 0,
-  [TileType.Challenge]: 0,
-  [TileType.Rest]: 0,
-  [TileType.Forge]: 0,
-});
+const CUSTOM_PRESET_VALUE = "__custom__";
+const PRESET_BY_NAME = Object.freeze(
+  new Map(PREDEFINED_TILE_COUNT_PRESETS.map((preset) => [preset.name, preset])),
+);
+const DEFAULT_PRESET = PREDEFINED_TILE_COUNT_PRESETS[0];
+
+const readFormRawConfig = (form) =>
+  TILE_TYPES.reduce((config, type) => {
+    const countElement = form.elements[`count-${type}`];
+    const facedownElement = form.elements[`facedown-${type}`];
+    config[type] = Object.freeze({
+      count: Number(countElement?.value ?? 0),
+      facedown: Boolean(facedownElement?.checked),
+    });
+    return config;
+  }, {});
+
+const isRawConfigEqual = (left, right) =>
+  TILE_TYPES.every((type) => {
+    const leftType = left[type] ?? {};
+    const rightType = right[type] ?? {};
+    return Number(leftType.count ?? 0) === Number(rightType.count ?? 0) &&
+      Boolean(leftType.facedown) === Boolean(rightType.facedown);
+  });
+
+const applyPresetToForm = (form, preset) => {
+  for (const type of TILE_TYPES) {
+    const countElement = form.elements[`count-${type}`];
+    const facedownElement = form.elements[`facedown-${type}`];
+    if (countElement) {
+      countElement.value = String(preset.getCount(type));
+    }
+    if (facedownElement) {
+      facedownElement.checked = preset.isFacedown(type);
+    }
+  }
+};
+
+const syncPresetSelectionFromForm = (form) => {
+  const selectElement = form.elements.preset;
+  if (!selectElement) return;
+
+  const currentRawConfig = readFormRawConfig(form);
+  const matchingPreset = PREDEFINED_TILE_COUNT_PRESETS.find((preset) =>
+    isRawConfigEqual(currentRawConfig, preset.toRawConfig()));
+
+  selectElement.value = matchingPreset?.name ?? CUSTOM_PRESET_VALUE;
+};
 
 const getDialogContent = () => {
+  const presetOptions = PREDEFINED_TILE_COUNT_PRESETS.map(
+    (preset) => `<option value="${preset.name}">${preset.name}</option>`,
+  ).join("");
+
   const rows = TILE_TYPES.map((type) => {
     const countName = `count-${type}`;
     const facedownName = `facedown-${type}`;
-    const defaultCount = DEFAULT_COUNT_BY_TYPE[type] ?? 0;
 
     return `
       <tr>
         <td>${type}</td>
-        <td><input type="number" name="${countName}" min="0" step="1" value="${defaultCount}" required></td>
+        <td><input type="number" name="${countName}" min="0" step="1" value="0" required></td>
         <td><input type="checkbox" name="${facedownName}"></td>
       </tr>
     `;
@@ -32,6 +70,13 @@ const getDialogContent = () => {
 
   return `
     <p>Choose how many cards of each type to include in the generated hand.</p>
+    <div class="form-group">
+      <label>Preset</label>
+      <select name="preset">
+        ${presetOptions}
+        <option value="${CUSTOM_PRESET_VALUE}">Custom</option>
+      </select>
+    </div>
     <table>
       <thead>
         <tr>
@@ -45,16 +90,7 @@ const getDialogContent = () => {
   `;
 };
 
-const getRawConfigFromForm = (form) =>
-  TILE_TYPES.reduce((config, type) => {
-    const countElement = form.elements[`count-${type}`];
-    const facedownElement = form.elements[`facedown-${type}`];
-    config[type] = {
-      count: Number(countElement?.value ?? 0),
-      facedown: Boolean(facedownElement?.checked),
-    };
-    return config;
-  }, {});
+const getRawConfigFromForm = (form) => readFormRawConfig(form);
 
 const toErrorMessage = (error) => {
   if (Array.isArray(error?.errors) && error.errors.length) {
@@ -72,6 +108,38 @@ export const openGenerateDungeonLevelDialog = async ({ sourceDeck, onSubmit }) =
       closeOnSubmit: false,
     },
     content: getDialogContent(),
+    render: (event, dialog) => {
+      const form = dialog.element?.querySelector("form");
+      if (!form) return;
+
+      const selectElement = form.elements.preset;
+      if (DEFAULT_PRESET) {
+        applyPresetToForm(form, DEFAULT_PRESET);
+        if (selectElement) {
+          selectElement.value = DEFAULT_PRESET.name;
+        }
+      } else if (selectElement) {
+        selectElement.value = CUSTOM_PRESET_VALUE;
+      }
+
+      if (selectElement) {
+        selectElement.addEventListener("change", () => {
+          if (selectElement.value === CUSTOM_PRESET_VALUE) return;
+          const preset = PRESET_BY_NAME.get(selectElement.value);
+          if (!preset) return;
+
+          applyPresetToForm(form, preset);
+          syncPresetSelectionFromForm(form);
+        });
+      }
+
+      for (const type of TILE_TYPES) {
+        const countElement = form.elements[`count-${type}`];
+        const facedownElement = form.elements[`facedown-${type}`];
+        countElement?.addEventListener("input", () => syncPresetSelectionFromForm(form));
+        facedownElement?.addEventListener("change", () => syncPresetSelectionFromForm(form));
+      }
+    },
     buttons: [
       {
         action: "submit",

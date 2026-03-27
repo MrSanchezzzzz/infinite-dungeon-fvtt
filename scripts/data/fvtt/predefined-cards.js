@@ -1,4 +1,4 @@
-import { PREDEFINED_TILE_DEFINITIONS, TilePosition, TileType } from "../../domain/index.js";
+import { PREDEFINED_TILE_DEFINITIONS, TilePositionRule, TileType } from "../../domain/index.js";
 import { toModuleId } from "../../core/index.js";
 import { createFvttCardModel, DEFAULT_CARD_BACK_NAME } from "./models/index.js";
 
@@ -7,10 +7,10 @@ export const TILE_BACK_IMAGE = `${ICONS_BASE_PATH}/dungeon_tile_back.png`;
 export const TILE_BACK_ALT_IMAGE = `${ICONS_BASE_PATH}/dungeon_tile_back_alt.jpg`;
 const CARD_SIZE = 3;
 
-const BACK_IMAGE_BY_POSITION = Object.freeze({
-  [TilePosition.Entrance]: TILE_BACK_IMAGE,
-  [TilePosition.Inside]: TILE_BACK_IMAGE,
-  [TilePosition.Edges]: TILE_BACK_ALT_IMAGE,
+const BACK_IMAGE_BY_POSITION_RULE = Object.freeze({
+  [TilePositionRule.Entrance]: TILE_BACK_IMAGE,
+  [TilePositionRule.Inside]: TILE_BACK_IMAGE,
+  [TilePositionRule.Edges]: TILE_BACK_ALT_IMAGE,
 });
 
 const TILE_IMAGE_BY_TYPE = Object.freeze({
@@ -36,7 +36,7 @@ const toCardId = (index) => `tile${String(index + 1).padStart(12, "0")}`;
 const toCardModuleId = (index) => toModuleId(`card-${String(index + 1).padStart(4, "0")}`);
 
 export const PREDEFINED_FVTT_CARDS = Object.freeze(
-  PREDEFINED_TILE_DEFINITIONS.map(({ type, position }, index) => {
+  PREDEFINED_TILE_DEFINITIONS.map(({ type, positionRule }, index) => {
     const cardModuleId = toCardModuleId(index);
     return createFvttCardModel({
       // Foundry requires _id to be 16-character alphanumeric.
@@ -58,7 +58,7 @@ export const PREDEFINED_FVTT_CARDS = Object.freeze(
       back: {
         name: DEFAULT_CARD_BACK_NAME,
         text: "",
-        img: BACK_IMAGE_BY_POSITION[position],
+        img: BACK_IMAGE_BY_POSITION_RULE[positionRule],
       },
       face: 0,
       drawn: false,
@@ -69,7 +69,7 @@ export const PREDEFINED_FVTT_CARDS = Object.freeze(
           id: cardModuleId,
           tile: {
             type,
-            position,
+            positionRule,
           },
         },
       },

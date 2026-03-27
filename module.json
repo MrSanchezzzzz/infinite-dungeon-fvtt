@@ -1,11 +1,20 @@
 {
   "id": "infinite-dungeon",
   "title": "Infinite Dungeon",
-  "description": "A Foundry VTT module scaffold for building an endless dungeon experience.",
-  "version": "0.2.0",
+  "description": "A Foundry VTT module  for building an endless dungeon experience.",
+  "version": "1.0.0",
   "authors": [
     {
-      "name": "MrSanchezzzzz"
+      "name": "Shurup"
+    },
+    {
+      "name": "Amelia"
+    },
+    {
+      "name": "Zael"
+    },
+    {
+      "name": "Sarden"
     }
   ],
   "esmodules": [
@@ -32,6 +41,14 @@
   "compatibility": {
     "minimum": "12",
     "verified": "13"
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "complete-card-management",
+        "type": "module"
+      }
+    ]
   },
   "license": "LICENSE",
   "readme": "README.md"

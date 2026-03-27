@@ -1,4 +1,4 @@
-import { generateDungeonLevelHand } from "../../../application/index.js";
+import { generateDungeonLevelAndPlaceOnCanvas } from "../../../application/index.js";
 import { isPredefinedTilesDeck } from "../../../data/fvtt/repositories/index.js";
 import { openGenerateDungeonLevelDialog } from "../dialogs/generate-dungeon-level-dialog.js";
 
@@ -25,13 +25,14 @@ export const registerCardsContextMenu = () => {
         await openGenerateDungeonLevelDialog({
           sourceDeck,
           onSubmit: async ({ sourceDeck: currentDeck, rawConfig }) => {
-            const hand = await generateDungeonLevelHand({
+            const { hand, placedCardsCount } = await generateDungeonLevelAndPlaceOnCanvas({
               sourceDeck: currentDeck,
               rawConfig,
             });
 
-            ui.notifications.info(`Generated hand "${hand.name}" with ${hand.cards.size} cards.`);
-            hand.sheet?.render({ force: true });
+            ui.notifications.info(
+              `Generated hand "${hand.name}" (${hand.cards.size} cards) and placed ${placedCardsCount} cards on canvas.`,
+            );
           },
         });
       },
