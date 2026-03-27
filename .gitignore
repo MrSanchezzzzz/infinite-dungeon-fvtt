@@ -6,3 +6,5 @@ packs/**/LOG
 packs/**/LOG.old
 packs/**/MANIFEST-*
 packs/**/[0-9]*.log
+
+.creds
