@@ -1,6 +1,5 @@
+import { MODULE_ID } from "./core/index.js";
 import { registerCardsContextMenu } from "./presentation/index.js";
-
-const MODULE_ID = "infinite-dungeon";
 
 Hooks.once("init", () => {
   registerCardsContextMenu();

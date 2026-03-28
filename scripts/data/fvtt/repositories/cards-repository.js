@@ -1,7 +1,5 @@
 import { TILES_DECK_ID } from "../predefined-deck.js";
-
-const IDENTITY_FLAG_SCOPE = "infinite-dungeon";
-const CCM_MODULE_ID = "complete-card-management";
+import { CCM_MODULE_ID, IDENTITY_FLAG_SCOPE } from "../../../core/index.js";
 
 const getCardsDocumentClass = () => getDocumentClass("Cards");
 const getTileTypeFromCard = (card) => {

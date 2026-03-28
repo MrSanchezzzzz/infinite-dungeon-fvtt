@@ -1,4 +1,4 @@
-import { TileType } from "../entities/tile.js";
+import { TILE_TYPES, TileType, reduceTileTypes } from "../entities/tile.js";
 
 export class DungeonLevelValidationError extends Error {
   constructor(errors) {
@@ -9,10 +9,9 @@ export class DungeonLevelValidationError extends Error {
 }
 
 const REQUIRED_TYPES = Object.freeze([TileType.Entrance, TileType.Boss]);
-const TILE_TYPES = Object.freeze(Object.values(TileType));
 
 export const normalizeDungeonLevelConfig = (rawConfig = {}) =>
-  TILE_TYPES.reduce((config, type) => {
+  reduceTileTypes((config, type) => {
     const rawTypeConfig = rawConfig[type] ?? {};
     const rawCount = Number(rawTypeConfig.count ?? 0);
     config[type] = Object.freeze({

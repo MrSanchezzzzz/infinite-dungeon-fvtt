@@ -1,7 +1,5 @@
 import { assertInteger, assertString, assertType } from "../../core/utils.js";
-import { TileType } from "./tile.js";
-
-const TILE_TYPES = Object.freeze(Object.values(TileType));
+import { TILE_TYPES, reduceTileTypes } from "./tile.js";
 
 const toNormalizedCountByType = (countByType) => {
   assertType(countByType, Map, "countByType", "tile count preset");
@@ -71,7 +69,7 @@ export class TileCountPreset {
   }
 
   toRawConfig() {
-    return TILE_TYPES.reduce((rawConfig, tileType) => {
+    return reduceTileTypes((rawConfig, tileType) => {
       rawConfig[tileType] = Object.freeze({
         count: this.getCount(tileType),
         facedown: this.isFacedown(tileType),

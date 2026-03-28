@@ -1,4 +1,13 @@
-export { Tile, PositionedTile, TilePositionRule, TileType } from "./entities/tile.js";
+export {
+  Tile,
+  PositionedTile,
+  TilePositionRule,
+  TileType,
+  TILE_TYPES,
+  forEachTileType,
+  mapTileTypes,
+  reduceTileTypes,
+} from "./entities/tile.js";
 export { TileCountPreset } from "./entities/tile-count-preset.js";
 export {
   DEFAULT_TILE_COUNT_PRESET,

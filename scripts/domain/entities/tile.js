@@ -20,8 +20,17 @@ export const TileType = Object.freeze({
   Forge: "Forge",
 });
 
+export const TILE_TYPES = Object.freeze(Object.values(TileType));
+export const forEachTileType = (callback) => {
+  for (const tileType of TILE_TYPES) {
+    callback(tileType);
+  }
+};
+export const mapTileTypes = (callback) => TILE_TYPES.map(callback);
+export const reduceTileTypes = (callback, initialValue) => TILE_TYPES.reduce(callback, initialValue);
+
 const TILE_POSITION_RULES = new Set(Object.values(TilePositionRule));
-const TILE_TYPES = new Set(Object.values(TileType));
+const TILE_TYPE_SET = new Set(TILE_TYPES);
 
 export class Tile {
   constructor(positionRule, type) {
@@ -29,7 +38,7 @@ export class Tile {
       throw new Error(`Invalid tile position rule: ${positionRule}`);
     }
 
-    if (!TILE_TYPES.has(type)) {
+    if (!TILE_TYPE_SET.has(type)) {
       throw new Error(`Invalid tile type: ${type}`);
     }
 

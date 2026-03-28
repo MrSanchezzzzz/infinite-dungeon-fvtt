@@ -1,11 +1,11 @@
 import { PREDEFINED_TILE_DEFINITIONS, TilePositionRule, TileType } from "../../domain/index.js";
-import { toModuleId } from "../../core/index.js";
+import { IDENTITY_FLAG_SCOPE, toModuleId } from "../../core/index.js";
+import { DEFAULT_TILE_SIZE } from "./constants.js";
 import { createFvttCardModel, DEFAULT_CARD_BACK_NAME } from "./models/index.js";
 
 const ICONS_BASE_PATH = "modules/infinite-dungeon/assets/icons";
 export const TILE_BACK_IMAGE = `${ICONS_BASE_PATH}/dungeon_tile_back.png`;
 export const TILE_BACK_ALT_IMAGE = `${ICONS_BASE_PATH}/dungeon_tile_back_alt.jpg`;
-const CARD_SIZE = 3;
 
 const BACK_IMAGE_BY_POSITION_RULE = Object.freeze({
   [TilePositionRule.Entrance]: TILE_BACK_IMAGE,
@@ -46,8 +46,8 @@ export const PREDEFINED_FVTT_CARDS = Object.freeze(
       type: "base",
       suit: "tile",
       value: index + 1,
-      width: CARD_SIZE,
-      height: CARD_SIZE,
+      width: DEFAULT_TILE_SIZE.width,
+      height: DEFAULT_TILE_SIZE.height,
       faces: [
         {
           name: type,
@@ -65,7 +65,7 @@ export const PREDEFINED_FVTT_CARDS = Object.freeze(
       rotation: 0,
       sort: index,
       flags: {
-        "infinite-dungeon": {
+        [IDENTITY_FLAG_SCOPE]: {
           id: cardModuleId,
           tile: {
             type,

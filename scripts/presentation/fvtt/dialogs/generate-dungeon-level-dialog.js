@@ -1,9 +1,20 @@
-import { PREDEFINED_TILE_COUNT_PRESETS, TileType } from "../../../domain/index.js";
+import {
+  PREDEFINED_TILE_COUNT_PRESETS,
+  TILE_TYPES,
+  normalizeDungeonLevelConfig,
+} from "../../../domain/index.js";
 
-const TILE_TYPES = Object.freeze(Object.values(TileType));
 const CUSTOM_PRESET_VALUE = "__custom__";
 const PRESET_BY_NAME = Object.freeze(
   new Map(PREDEFINED_TILE_COUNT_PRESETS.map((preset) => [preset.name, preset])),
+);
+const NORMALIZED_PRESET_CONFIG_BY_NAME = Object.freeze(
+  new Map(
+    PREDEFINED_TILE_COUNT_PRESETS.map((preset) => [
+      preset.name,
+      normalizeDungeonLevelConfig(preset.toRawConfig()),
+    ]),
+  ),
 );
 const DEFAULT_PRESET = PREDEFINED_TILE_COUNT_PRESETS[0];
 
@@ -18,12 +29,11 @@ const readFormRawConfig = (form) =>
     return config;
   }, {});
 
-const isRawConfigEqual = (left, right) =>
+const isNormalizedConfigEqual = (left, right) =>
   TILE_TYPES.every((type) => {
-    const leftType = left[type] ?? {};
-    const rightType = right[type] ?? {};
-    return Number(leftType.count ?? 0) === Number(rightType.count ?? 0) &&
-      Boolean(leftType.facedown) === Boolean(rightType.facedown);
+    const leftType = left[type];
+    const rightType = right[type];
+    return leftType.count === rightType.count && leftType.facedown === rightType.facedown;
   });
 
 const applyPresetToForm = (form, preset) => {
@@ -43,9 +53,9 @@ const syncPresetSelectionFromForm = (form) => {
   const selectElement = form.elements.preset;
   if (!selectElement) return;
 
-  const currentRawConfig = readFormRawConfig(form);
+  const currentConfig = normalizeDungeonLevelConfig(readFormRawConfig(form));
   const matchingPreset = PREDEFINED_TILE_COUNT_PRESETS.find((preset) =>
-    isRawConfigEqual(currentRawConfig, preset.toRawConfig()));
+    isNormalizedConfigEqual(currentConfig, NORMALIZED_PRESET_CONFIG_BY_NAME.get(preset.name)));
 
   selectElement.value = matchingPreset?.name ?? CUSTOM_PRESET_VALUE;
 };

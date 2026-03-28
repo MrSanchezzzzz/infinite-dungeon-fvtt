@@ -1,11 +1,14 @@
+import { DEFAULT_TILE_SIZE } from "../constants.js";
+import { assertRequiredFields, freezeArray, freezeObject } from "./model-utils.js";
+
 const DEFAULT_DECK_TYPE = "deck";
 const DEFAULT_DECK_ROTATION = 0;
 const DEFAULT_DECK_DISPLAY_COUNT = true;
 const DEFAULT_DECK_SORT = 0;
-const DEFAULT_DECK_WIDTH = 3;
-const DEFAULT_DECK_HEIGHT = 3;
+const DEFAULT_DECK_WIDTH = DEFAULT_TILE_SIZE.width;
+const DEFAULT_DECK_HEIGHT = DEFAULT_TILE_SIZE.height;
 const DEFAULT_DECK_FOLDER = null;
-const DEFAULT_DECK_OWNERSHIP = Object.freeze({
+const DEFAULT_DECK_OWNERSHIP = freezeObject({
   default: 0,
 });
 
@@ -26,9 +29,11 @@ export const createFvttDeckModel = ({
   ownership = DEFAULT_DECK_OWNERSHIP,
   flags = {},
 }) => {
-  if (!_id) throw new Error("FVTT deck model requires _id");
-  if (!name) throw new Error("FVTT deck model requires name");
-  if (!img) throw new Error("FVTT deck model requires img");
+  assertRequiredFields("FVTT deck model", [
+    ["_id", _id],
+    ["name", name],
+    ["img", img],
+  ]);
 
   return Object.freeze({
     _id,
@@ -36,15 +41,15 @@ export const createFvttDeckModel = ({
     description,
     type,
     img,
-    system: Object.freeze({ ...system }),
-    cards: Object.freeze([...cards]),
+    system: freezeObject(system),
+    cards: freezeArray(cards),
     width,
     height,
     rotation,
     displayCount,
     folder,
     sort,
-    ownership: Object.freeze({ ...ownership }),
-    flags: Object.freeze({ ...flags }),
+    ownership: freezeObject(ownership),
+    flags: freezeObject(flags),
   });
 };

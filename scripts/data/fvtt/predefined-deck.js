@@ -1,5 +1,6 @@
 import { PREDEFINED_FVTT_CARDS, TILE_BACK_IMAGE } from "./predefined-cards.js";
-import { toModuleId } from "../../core/index.js";
+import { IDENTITY_FLAG_SCOPE, toModuleId } from "../../core/index.js";
+import { DEFAULT_TILE_SIZE } from "./constants.js";
 import { createFvttDeckModel } from "./models/index.js";
 
 export const TILES_DECK_ID = toModuleId("deck-tiles");
@@ -14,8 +15,8 @@ export const PREDEFINED_TILES_DECK = createFvttDeckModel({
   img: TILE_BACK_IMAGE,
   system: {},
   cards: PREDEFINED_FVTT_CARDS,
-  width: 3,
-  height: 3,
+  width: DEFAULT_TILE_SIZE.width,
+  height: DEFAULT_TILE_SIZE.height,
   rotation: 0,
   displayCount: true,
   folder: null,
@@ -24,7 +25,7 @@ export const PREDEFINED_TILES_DECK = createFvttDeckModel({
     default: 0,
   },
   flags: {
-    "infinite-dungeon": {
+    [IDENTITY_FLAG_SCOPE]: {
       id: TILES_DECK_ID,
       predefined: true,
     },

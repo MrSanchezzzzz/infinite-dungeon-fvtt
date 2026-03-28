@@ -1,8 +1,9 @@
 import {
-  TileType,
+  TILE_TYPES,
   assertValidDungeonLevelConfig,
 } from "../../domain/index.js";
 import * as cardsRepository from "../../data/fvtt/repositories/index.js";
+import { withRollback } from "./with-rollback.js";
 
 const toDefaultHandName = (sourceDeck) => `${sourceDeck.name} - Dungeon Level`;
 
@@ -15,7 +16,7 @@ export const generateDungeonLevelHand = async ({
   const config = assertValidDungeonLevelConfig(rawConfig);
   const cardsData = [];
 
-  for (const tileType of Object.values(TileType)) {
+  for (const tileType of TILE_TYPES) {
     const { count, facedown } = config[tileType];
     if (!count) continue;
 
@@ -40,12 +41,12 @@ export const generateDungeonLevelHand = async ({
     name: handName?.trim() || toDefaultHandName(sourceDeck),
   });
 
-  try {
-    await repository.createCardsInHand({ hand, cardsData });
-  } catch (error) {
-    await hand.delete().catch(() => undefined);
-    throw error;
-  }
+  await withRollback({
+    action: () => repository.createCardsInHand({ hand, cardsData }),
+    rollback: async () => {
+      await hand.delete().catch(() => undefined);
+    },
+  });
 
   return hand;
 };

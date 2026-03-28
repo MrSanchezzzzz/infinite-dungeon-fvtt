@@ -1,13 +1,15 @@
 import {
+  TILE_TYPES,
   assertValidDungeonLevelConfig,
   FrontierGrowthClassic,
   LayerFactory,
   PREDEFINED_TILE_DEFINITIONS,
   Tile,
-  TileType,
 } from "../../domain/index.js";
+import { assertType } from "../../core/index.js";
 import * as cardsRepository from "../../data/fvtt/repositories/index.js";
 import { generateDungeonLevelHand } from "./generate-dungeon-level-hand.js";
+import { withRollback } from "./with-rollback.js";
 
 const DEFAULT_LAYER_DEPTH = 0;
 const POSITION_RULE_BY_TYPE = new Map(
@@ -21,6 +23,8 @@ const toCoordinates = (origin, spacing, tile) => ({
 });
 
 const assertFiniteNumber = (value, label) => {
+  assertType(value, Number, label, "value");
+
   if (!Number.isFinite(value)) {
     throw new Error(`Invalid ${label}: expected a finite number.`);
   }
@@ -29,7 +33,7 @@ const assertFiniteNumber = (value, label) => {
 const toTilesFromConfig = (config) => {
   const tiles = [];
 
-  for (const tileType of Object.values(TileType)) {
+  for (const tileType of TILE_TYPES) {
     const positionRule = POSITION_RULE_BY_TYPE.get(tileType);
     if (!positionRule) {
       throw new Error(`No position rule mapping found for tile type "${tileType}".`);
@@ -135,26 +139,28 @@ export const generateDungeonLevelAndPlaceOnCanvas = async ({
   const resolvedSpacing = toSpacing({ sourceDeck, spacing });
   const placedCards = [];
 
-  try {
-    for (const tile of positionedTiles) {
-      const card = takeCardByTileType(cardsByType, tile.type);
-      const { x, y } = toCoordinates(resolvedOrigin, resolvedSpacing, tile);
+  await withRollback({
+    action: async () => {
+      for (const tile of positionedTiles) {
+        const card = takeCardByTileType(cardsByType, tile.type);
+        const { x, y } = toCoordinates(resolvedOrigin, resolvedSpacing, tile);
 
-      await repository.placeCardOnCanvas({
-        card,
-        x,
-        y,
-        sceneId,
-        sort: placedCards.length,
-      });
+        await repository.placeCardOnCanvas({
+          card,
+          x,
+          y,
+          sceneId,
+          sort: placedCards.length,
+        });
 
-      placedCards.push(card);
-    }
-  } catch (error) {
-    await rollbackPlacedCards(placedCards, repository);
-    await hand.delete().catch(() => undefined);
-    throw error;
-  }
+        placedCards.push(card);
+      }
+    },
+    rollback: async () => {
+      await rollbackPlacedCards(placedCards, repository);
+      await hand.delete().catch(() => undefined);
+    },
+  });
 
   return { hand, layer, placedCardsCount: placedCards.length };
 };

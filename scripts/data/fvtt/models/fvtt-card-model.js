@@ -1,9 +1,12 @@
+import { DEFAULT_TILE_SIZE } from "../constants.js";
+import { assertRequiredFields, freezeArray, freezeObject } from "./model-utils.js";
+
 const DEFAULT_CARD_TYPE = "base";
 const DEFAULT_CARD_FACE_INDEX = 0;
 const DEFAULT_CARD_DRAWN = false;
 const DEFAULT_CARD_ROTATION = 0;
-const DEFAULT_CARD_WIDTH = 3;
-const DEFAULT_CARD_HEIGHT = 3;
+const DEFAULT_CARD_WIDTH = DEFAULT_TILE_SIZE.width;
+const DEFAULT_CARD_HEIGHT = DEFAULT_TILE_SIZE.height;
 const DEFAULT_CARD_SUIT = "";
 const DEFAULT_CARD_VALUE = 0;
 const DEFAULT_CARD_SORT = 0;
@@ -42,8 +45,10 @@ export const createFvttCardModel = ({
   sort = DEFAULT_CARD_SORT,
   flags = {},
 }) => {
-  if (!_id) throw new Error("FVTT card model requires _id");
-  if (!name) throw new Error("FVTT card model requires name");
+  assertRequiredFields("FVTT card model", [
+    ["_id", _id],
+    ["name", name],
+  ]);
   if (!back?.img) throw new Error("FVTT card model requires back image");
   if (!Array.isArray(faces) || faces.length === 0) {
     throw new Error("FVTT card model requires at least one face");
@@ -54,11 +59,11 @@ export const createFvttCardModel = ({
     name,
     description,
     type,
-    system: Object.freeze({ ...system }),
+    system: freezeObject(system),
     suit,
     value,
     back: createFvttCardBackModel(back),
-    faces: Object.freeze(faces.map((faceModel) => createFvttCardFaceModel(faceModel))),
+    faces: freezeArray(faces.map((faceModel) => createFvttCardFaceModel(faceModel))),
     face,
     drawn,
     origin,
@@ -66,6 +71,6 @@ export const createFvttCardModel = ({
     height,
     rotation,
     sort,
-    flags: Object.freeze({ ...flags }),
+    flags: freezeObject(flags),
   });
 };
