@@ -1,10 +1,6 @@
-# Foundry compendium (LevelDB) runtime/service artifacts in pack folders.
-# Keep actual content files trackable.
-packs/**/LOCK
-packs/**/CURRENT
-packs/**/LOG
-packs/**/LOG.old
-packs/**/MANIFEST-*
-packs/**/[0-9]*.log
+# Foundry compendium cache folders are generated at runtime.
+# Keep canonical compendium export files (*.db) in repository.
+packs/*/
+!packs/*.db
 
 .creds
