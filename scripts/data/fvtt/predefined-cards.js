@@ -10,7 +10,7 @@ export const TILE_BACK_ALT_IMAGE = `${ICONS_BASE_PATH}/dungeon_tile_back_alt.jpg
 const BACK_IMAGE_BY_POSITION_RULE = Object.freeze({
   [TilePositionRule.Entrance]: TILE_BACK_IMAGE,
   [TilePositionRule.Inside]: TILE_BACK_IMAGE,
-  [TilePositionRule.Edges]: TILE_BACK_ALT_IMAGE,
+  [TilePositionRule.Edges]: TILE_BACK_IMAGE,
 });
 
 const TILE_IMAGE_BY_TYPE = Object.freeze({
