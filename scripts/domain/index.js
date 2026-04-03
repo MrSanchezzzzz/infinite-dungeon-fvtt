@@ -17,6 +17,7 @@ export {
 export { Layer } from "./entities/layer.js";
 export { LayerPlacementGenerator } from "./factories/layer-placement-generator.js";
 export { FrontierGrowthClassic } from "./factories/frontier-growth-classic.js";
+export { GrowingTreeLooped } from "./factories/growing-tree-looped.js";
 export { LayerFactory } from "./factories/layer-factory.js";
 export { PREDEFINED_TILE_DEFINITIONS, PREDEFINED_TILES } from "./entities/predefined-tiles.js";
 export {

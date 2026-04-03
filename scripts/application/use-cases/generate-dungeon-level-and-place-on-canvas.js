@@ -1,7 +1,7 @@
 import {
   TILE_TYPES,
   assertValidDungeonLevelConfig,
-  FrontierGrowthClassic,
+  GrowingTreeLooped,
   LayerFactory,
   PREDEFINED_TILE_DEFINITIONS,
   Tile,
@@ -113,7 +113,7 @@ export const generateDungeonLevelAndPlaceOnCanvas = async ({
   origin,
   spacing,
   repository = cardsRepository,
-  layerFactory = new LayerFactory(new FrontierGrowthClassic()),
+  layerFactory = new LayerFactory(new GrowingTreeLooped()),
 }) => {
   const config = assertValidDungeonLevelConfig(rawConfig);
   repository.assertCanvasPlacementAvailable();

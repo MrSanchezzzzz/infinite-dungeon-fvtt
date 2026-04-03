@@ -1,54 +1,19 @@
 import { assertInteger, assertType } from "../../core/utils.js";
 import { TilePositionRule } from "../entities/tile.js";
 import { LayerPlacementGenerator } from "./layer-placement-generator.js";
+import {
+  AROUND_DIRECTIONS_8,
+  ORTHOGONAL_DIRECTIONS,
+  isOrthogonallyAdjacent,
+  shuffle,
+  toCoordinateKey,
+  toRandomIndex,
+  toTilePartitions,
+} from "./placement-utils.js";
 
-const ORTHOGONAL_DIRECTIONS = Object.freeze([
-  Object.freeze({ x: 1, y: 0 }),
-  Object.freeze({ x: -1, y: 0 }),
-  Object.freeze({ x: 0, y: 1 }),
-  Object.freeze({ x: 0, y: -1 }),
-]);
-const AROUND_DIRECTIONS_8 = Object.freeze([
-  Object.freeze({ x: 1, y: 0 }),
-  Object.freeze({ x: -1, y: 0 }),
-  Object.freeze({ x: 0, y: 1 }),
-  Object.freeze({ x: 0, y: -1 }),
-  Object.freeze({ x: 1, y: 1 }),
-  Object.freeze({ x: 1, y: -1 }),
-  Object.freeze({ x: -1, y: 1 }),
-  Object.freeze({ x: -1, y: -1 }),
-]);
-
-const toCoordinateKey = (x, y) => `${x},${y}`;
-
-const toRandomIndex = (length, rng) => {
-  const value = rng();
-  if (typeof value !== "number" || Number.isNaN(value) || value < 0 || value >= 1) {
-    throw new Error(`FrontierGrowthClassic rng returned invalid value: ${value}.`);
-  }
-
-  return Math.floor(value * length);
-};
+const MAX_AROUND_NEIGHBORS = 5;
 
 const pickRandom = (items, rng) => items[toRandomIndex(items.length, rng)];
-
-const shuffle = (items, rng) => {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = toRandomIndex(index + 1, rng);
-    const temp = shuffled[index];
-    shuffled[index] = shuffled[swapIndex];
-    shuffled[swapIndex] = temp;
-  }
-
-  return shuffled;
-};
-
-const isOrthogonallyAdjacent = (left, right) => {
-  const xDistance = Math.abs(left.x - right.x);
-  const yDistance = Math.abs(left.y - right.y);
-  return xDistance + yDistance === 1;
-};
 
 const toOrthogonalNeighbors = (x, y) => ORTHOGONAL_DIRECTIONS.map((direction) => ({
   x: x + direction.x,
@@ -89,28 +54,6 @@ const selectNonAdjacentCoordinates = (candidates, count, rng) => {
   return backtrack(0) ? [...selected] : null;
 };
 
-const toTilePartitions = (tiles) => {
-  const entrances = [];
-  const insideTiles = [];
-  const edgeTiles = [];
-
-  for (const tile of tiles) {
-    if (tile.positionRule === TilePositionRule.Entrance) {
-      entrances.push(tile);
-      continue;
-    }
-
-    if (tile.positionRule === TilePositionRule.Edges) {
-      edgeTiles.push(tile);
-      continue;
-    }
-
-    insideTiles.push(tile);
-  }
-
-  return { entrances, insideTiles, edgeTiles };
-};
-
 const toNeighborCountByCoordinate = (coordinates, neighborsProvider) => {
   const occupied = new Set(coordinates.map(({ x, y }) => toCoordinateKey(x, y)));
   const counts = new Map();
@@ -147,7 +90,7 @@ const isValidFinalLayout = (placements) => {
     }
 
     const aroundCount = around8NeighborCountByCoordinate.get(key) ?? 0;
-    if (aroundCount > 6) {
+    if (aroundCount > MAX_AROUND_NEIGHBORS) {
       return false;
     }
   }
@@ -220,7 +163,7 @@ const buildAttemptPlacements = ({ coreTiles, edgeTiles, rng }) => {
 };
 
 export class FrontierGrowthClassic extends LayerPlacementGenerator {
-  constructor({ rng = Math.random, maxAttempts = 200 } = {}) {
+  constructor({ rng = Math.random, maxAttempts = 1000000 } = {}) {
     super();
     assertType(rng, Function, "rng", "FrontierGrowthClassic");
     assertInteger(maxAttempts, "maxAttempts", "FrontierGrowthClassic");
