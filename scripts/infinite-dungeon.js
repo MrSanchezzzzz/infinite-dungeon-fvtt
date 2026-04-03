@@ -1,5 +1,5 @@
 import { MODULE_ID } from "./core/index.js";
-import { registerCardsContextMenu } from "./presentation/index.js";
+import { registerCardsContextMenu, registerTileVisitControls } from "./presentation/index.js";
 
 Hooks.once("init", () => {
   registerCardsContextMenu();
@@ -7,5 +7,6 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  console.log(`${MODULE_ID} | Ready`);
+  registerTileVisitControls();
+  console.log(`${MODULE_ID} | ${game.i18n.localize("INFINITE_DUNGEON.Ready")}`);
 });

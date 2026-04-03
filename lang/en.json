@@ -1,6 +1,13 @@
 {
   "INFINITE_DUNGEON": {
     "Name": "Infinite Dungeon",
-    "Ready": "Infinite Dungeon is ready."
+    "Ready": "Infinite Dungeon is ready.",
+    "TileVisit": {
+      "NoActiveScene": "No active scene is available for tile state updates.",
+      "NotOnScene": "Tile \"{tile}\" is not on the active scene.",
+      "ToggleOccupied": "Toggle occupied state",
+      "ToggleVisited": "Toggle visited state",
+      "UpdateFailed": "Failed to update tile visit state."
+    }
   }
 }

@@ -8,6 +8,7 @@ export {
   mapTileTypes,
   reduceTileTypes,
 } from "./entities/tile.js";
+export { TileVisitState, isTileVisitState, normalizeTileVisitState } from "./entities/tile-visit-state.js";
 export { TileCountPreset } from "./entities/tile-count-preset.js";
 export {
   DEFAULT_TILE_COUNT_PRESET,
