@@ -1,46 +1,21 @@
 # Infinite Dungeon
 
-A Foundry VTT module scaffold.
+Create dungeon maps from a deck directly in Foundry VTT.
 
-## Development
+## Installation
 
-1. Enable this module in your Foundry world.
-2. Open the browser console to verify init/ready logs.
-3. Regenerate compendium data with `node --experimental-default-type=module scripts/data/fvtt/export-compendium.js`.
+1. Download this repository as a ZIP file.
+2. Extract the ZIP.
+3. Put the extracted `infinite-dungeon` folder into your Foundry `Data/modules` folder.
+4. Start Foundry VTT and install/enable the **Complete Card Management** module (dependency).
+5. Enable **Infinite Dungeon** in your world.
 
-## Structure
+## Features
 
-- `module.json` - Foundry manifest
-- `scripts/infinite-dungeon.js` - Module entrypoint
-- `scripts/application/use-cases/generate-dungeon-level-hand.js` - Use-case for creating a generated dungeon-level hand
-- `scripts/application/use-cases/generate-dungeon-level-and-place-on-canvas.js` - Use-case for generating a dungeon layer and placing cards on canvas
-- `scripts/application/index.js` - Application-layer exports
-- `scripts/data/fvtt/models/fvtt-card-model.js` - Canonical FVTT `Card` model builder
-- `scripts/data/fvtt/models/fvtt-deck-model.js` - Canonical FVTT `Cards` deck model builder
-- `scripts/data/fvtt/models/index.js` - FVTT model exports
-- `scripts/data/fvtt/export-compendium.js` - Compendium exporter from predefined deck model
-- `scripts/data/fvtt/repositories/cards-repository.js` - FVTT cards/deck repository adapter
-- `scripts/data/fvtt/repositories/index.js` - Repository exports
-- `scripts/core/id.js` - Shared ID constants/helpers (`ID_PREFIX`)
-- `scripts/core/utils.js` - Shared assertion helpers (`assertInteger`, `assertString`, `assertType`)
-- `scripts/core/index.js` - Core exports
-- `scripts/domain/entities/tile.js` - Domain tile entities (`PositionedTile`, `Tile`, `TilePositionRule`, `TileType`)
-- `scripts/domain/entities/tile-count-preset.js` - Domain tile count preset entity (`TileCountPreset`)
-- `scripts/domain/entities/predefined-tile-count-presets.js` - Predefined tile count presets (`DEFAULT_TILE_COUNT_PRESET`)
-- `scripts/domain/entities/layer.js` - Domain layer entity (`Layer`, tiles as `Map<number, Map<number, PositionedTile>>`)
-- `scripts/domain/factories/layer-placement-generator.js` - Abstract placement strategy base class (`LayerPlacementGenerator`)
-- `scripts/domain/factories/frontier-growth-classic.js` - Frontier growth placement strategy (`FrontierGrowthClassic`)
-- `scripts/domain/factories/layer-factory.js` - Layer construction factory using placement strategies (`LayerFactory`)
-- `scripts/domain/entities/predefined-tiles.js` - Predefined tile definitions and instances
-- `scripts/domain/validation/dungeon-level-validation.js` - Domain rules and validation for dungeon level generation
-- `scripts/domain/index.js` - Domain exports
-- `scripts/data/fvtt/predefined-cards.js` - Predefined FVTT card objects
-- `scripts/data/fvtt/predefined-deck.js` - Predefined FVTT `Cards` deck source (`Tiles`)
-- `scripts/data/fvtt/index.js` - FVTT data exports
-- `scripts/presentation/fvtt/dialogs/generate-dungeon-level-dialog.js` - UI dialog for dungeon level configuration
-- `scripts/presentation/fvtt/context-menus/cards-context-menu.js` - Cards-directory context menu integration
-- `scripts/presentation/fvtt/index.js` - Presentation FVTT exports
-- `scripts/presentation/index.js` - Presentation-layer exports
-- `packs/infinite-dungeon-decks.db` - Module compendium data (`Infinite Dungeon Decks`)
-- `styles/infinite-dungeon.css` - Module styles
-- `lang/en.json` - Localization strings
+1. Compendium deck with tiles.
+2. Right-click (RMB) the deck to generate a tile map.
+2.1. You need to import the deck from the compendium before generating.
+2.2. Use a preset (Default or Custom) to quickly set up generation.
+2.3. Generation requires at least 1 Entrance tile and 1 Boss tile.
+3. Right-click (RMB) a tile to mark it as visited (checkmark icon) or occupied (map pin icon).
+3.1. Only one tile can be occupied at a time; marking a new occupied tile clears the previous one.
