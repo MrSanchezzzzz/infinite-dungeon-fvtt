@@ -4,7 +4,7 @@ Create dungeon maps from a deck directly in Foundry VTT.
 
 ## Installation
 
-1. Download this repository as a ZIP file.
+1. Download the latest module package ZIP: [infinite-dungeon.zip](https://github.com/MrSanchezzzzz/infinite-dungeon-fvtt/releases/download/module-package-latest/infinite-dungeon.zip).
 2. Extract the ZIP.
 3. Put the extracted `infinite-dungeon` folder into your Foundry `Data/modules` folder.
 4. Start Foundry VTT and install/enable the **Complete Card Management** module (dependency).

@@ -1,0 +1,107 @@
+name: Package Module
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Build Zip Artifact
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip rsync
+
+      - name: Regenerate deck compendium database
+        run: node --experimental-default-type=module scripts/data/fvtt/export-compendium.js
+
+      - name: Remove LevelDB cache folder
+        run: rm -rf packs/infinite-dungeon-decks
+
+      - name: Read module metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          module_id="$(node -p "require('./module.json').id")"
+          module_version="$(node -p "require('./module.json').version")"
+          artifact_name="${module_id}-v${module_version}-${GITHUB_SHA::7}"
+
+          echo "module_id=${module_id}" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=${artifact_name}" >> "$GITHUB_OUTPUT"
+
+      - name: Build distributable zip
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          module_id="${{ steps.meta.outputs.module_id }}"
+          stage_root="${RUNNER_TEMP}/module-package"
+          module_root="${stage_root}/${module_id}"
+          zip_path="${RUNNER_TEMP}/${module_id}.zip"
+
+          rm -rf "$stage_root" "$zip_path"
+          mkdir -p "$module_root"
+
+          # Strict whitelist: include only files/folders needed by the Foundry module.
+          rsync -a module.json "$module_root/"
+
+          for path in assets lang packs scripts styles; do
+            if [ -e "$path" ]; then
+              rsync -a "$path" "$module_root/"
+            fi
+          done
+
+          # Do not ship Foundry runtime cache files (if present).
+          rm -rf "$module_root/packs/infinite-dungeon-decks"
+
+          (
+            cd "$stage_root"
+            zip -r "$zip_path" "$module_id"
+          )
+
+      - name: Upload module zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: ${{ runner.temp }}/${{ steps.meta.outputs.module_id }}.zip
+          if-no-files-found: error
+
+      - name: Publish stable release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          module_id="${{ steps.meta.outputs.module_id }}"
+          zip_path="${RUNNER_TEMP}/${module_id}.zip"
+          release_tag="module-package-latest"
+          release_title="Module package (latest main)"
+          release_notes="Automated package built from ${GITHUB_SHA}."
+
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" "$zip_path#${module_id}.zip" --clobber
+            gh release edit "$release_tag" --title "$release_title" --notes "$release_notes"
+          else
+            gh release create "$release_tag" "$zip_path#${module_id}.zip" --title "$release_title" --notes "$release_notes"
+          fi
