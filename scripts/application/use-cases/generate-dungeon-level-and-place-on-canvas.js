@@ -48,6 +48,29 @@ const toTilesFromConfig = (config) => {
   return tiles;
 };
 
+const toRandomValue = (rng) => {
+  const value = rng();
+  if (typeof value !== "number" || Number.isNaN(value) || value < 0 || value >= 1) {
+    throw new Error(`Shuffle rng returned invalid value: ${value}.`);
+  }
+
+  return value;
+};
+
+const shuffleTiles = (tiles, rng = Math.random) => {
+  assertType(rng, Function, "rng", "tile shuffle");
+
+  const shuffledTiles = [...tiles];
+  for (let index = shuffledTiles.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(toRandomValue(rng) * (index + 1));
+    const currentTile = shuffledTiles[index];
+    shuffledTiles[index] = shuffledTiles[swapIndex];
+    shuffledTiles[swapIndex] = currentTile;
+  }
+
+  return shuffledTiles;
+};
+
 const toFlatPositionedTiles = (layer) => {
   const positionedTiles = [];
 
@@ -119,10 +142,11 @@ export const generateDungeonLevelAndPlaceOnCanvas = async ({
   repository.assertCanvasPlacementAvailable();
 
   const tiles = toTilesFromConfig(config);
+  const shuffledTiles = shuffleTiles(tiles);
   const layer = layerFactory.create(
     layerName?.trim() || toDefaultLayerName(sourceDeck),
     layerDepth,
-    tiles,
+    shuffledTiles,
   );
 
   const hand = await generateDungeonLevelHand({
