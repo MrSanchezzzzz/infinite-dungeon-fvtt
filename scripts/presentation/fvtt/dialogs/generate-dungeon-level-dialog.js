@@ -17,6 +17,13 @@ const NORMALIZED_PRESET_CONFIG_BY_NAME = Object.freeze(
   ),
 );
 const DEFAULT_PRESET = PREDEFINED_TILE_COUNT_PRESETS[0];
+const ADVANCED_TOGGLE_SELECTOR = "[data-action='toggle-advanced']";
+const ADVANCED_FIELDS_SELECTOR = "[data-role='advanced-fields']";
+const CONTROLS_SCROLL_SELECTOR = ".infinite-dungeon-generate-content";
+const FOOTER_CONTAINER_SELECTOR = ".dialog-buttons, .form-footer, .window-footer, footer, menu";
+const ACTION_BUTTON_SELECTOR = "button[data-action], .dialog-buttons button, .form-footer button, .window-footer button, footer button, menu button";
+const DIALOG_FIXED_WIDTH = 540;
+const DIALOG_FIXED_HEIGHT = 620;
 
 const readFormRawConfig = (form) =>
   TILE_TYPES.reduce((config, type) => {
@@ -60,12 +67,165 @@ const syncPresetSelectionFromForm = (form) => {
   selectElement.value = matchingPreset?.name ?? CUSTOM_PRESET_VALUE;
 };
 
+const applyFixedDialogSize = (dialog) => {
+  const element = dialog.element;
+  if (!element) return;
+
+  const width = Math.min(DIALOG_FIXED_WIDTH, Math.max(320, window.innerWidth - 32));
+  const height = Math.min(DIALOG_FIXED_HEIGHT, Math.max(320, window.innerHeight - 32));
+
+  if (typeof dialog.setPosition === "function") {
+    dialog.setPosition({ width, height });
+  }
+
+  element.style.overflow = "hidden";
+  element.style.width = `${width}px`;
+  element.style.height = `${height}px`;
+  element.style.maxHeight = `${height}px`;
+};
+
+const findDirectChildBySelector = (parentElement, selector) => {
+  if (!(parentElement instanceof HTMLElement)) return null;
+
+  for (const childElement of parentElement.children) {
+    if (childElement instanceof HTMLElement && childElement.matches(selector)) {
+      return childElement;
+    }
+  }
+
+  return null;
+};
+
+const findFooterContainer = ({ form, windowContent }) => {
+  const footerInForm = findDirectChildBySelector(form, FOOTER_CONTAINER_SELECTOR);
+  if (footerInForm instanceof HTMLElement) return footerInForm;
+
+  const footerInWindowContent = findDirectChildBySelector(windowContent, FOOTER_CONTAINER_SELECTOR);
+  if (footerInWindowContent instanceof HTMLElement) return footerInWindowContent;
+
+  const candidateButton =
+    form.querySelector(ACTION_BUTTON_SELECTOR) ??
+    (windowContent instanceof HTMLElement ? windowContent.querySelector(ACTION_BUTTON_SELECTOR) : null);
+
+  if (!(candidateButton instanceof HTMLElement)) return null;
+
+  const nestedFooter = candidateButton.closest(FOOTER_CONTAINER_SELECTOR);
+  return nestedFooter instanceof HTMLElement ? nestedFooter : null;
+};
+
+const applyWindowContentLayout = (windowContent) => {
+  if (!(windowContent instanceof HTMLElement)) return;
+
+  windowContent.style.display = "flex";
+  windowContent.style.flexDirection = "column";
+  windowContent.style.minHeight = "0";
+  windowContent.style.overflow = "hidden";
+};
+
+const applyFormLayout = (form) => {
+  if (!(form instanceof HTMLElement)) return;
+
+  form.style.display = "flex";
+  form.style.flexDirection = "column";
+  form.style.flex = "1 1 auto";
+  form.style.minHeight = "0";
+  form.style.overflow = "hidden";
+};
+
+const applyControlsScrollContainerLayout = (controlsScrollContainer) => {
+  if (!(controlsScrollContainer instanceof HTMLElement)) return;
+
+  controlsScrollContainer.style.flex = "1 1 auto";
+  controlsScrollContainer.style.minHeight = "0";
+  controlsScrollContainer.style.overflowY = "auto";
+};
+
+const pinFooterContainer = (footerContainer) => {
+  if (!(footerContainer instanceof HTMLElement)) return;
+
+  footerContainer.style.marginTop = "auto";
+  footerContainer.style.flex = "0 0 auto";
+};
+
+const syncControlsScrollHeight = ({ form, controlsScrollContainer, footerContainer }) => {
+  if (!(form instanceof HTMLElement) || !(controlsScrollContainer instanceof HTMLElement)) return;
+
+  const windowContent = form.closest(".window-content");
+  const boundaryElement = windowContent instanceof HTMLElement ? windowContent : form;
+  const boundaryRect = boundaryElement.getBoundingClientRect();
+  const controlsRect = controlsScrollContainer.getBoundingClientRect();
+  const controlsTopOffset = controlsRect.top - boundaryRect.top;
+  const footerHeight = footerContainer instanceof HTMLElement
+    ? footerContainer.getBoundingClientRect().height
+    : 0;
+  const verticalPadding = 36;
+  const availableHeight = Math.floor(
+    boundaryRect.height - controlsTopOffset - footerHeight - verticalPadding);
+
+  if (availableHeight > 80) {
+    controlsScrollContainer.style.height = `${availableHeight}px`;
+    controlsScrollContainer.style.maxHeight = `${availableHeight}px`;
+  } else {
+    controlsScrollContainer.style.height = "";
+    controlsScrollContainer.style.maxHeight = "";
+  }
+
+  controlsScrollContainer.style.minHeight = "0";
+  controlsScrollContainer.style.overflowY = "auto";
+};
+
+const applyPinnedButtonsScrollableControlsLayout = (form) => {
+  const windowContent = form.closest(".window-content");
+  applyWindowContentLayout(windowContent);
+  applyFormLayout(form);
+
+  const controlsScrollContainer = form.querySelector(CONTROLS_SCROLL_SELECTOR);
+  applyControlsScrollContainerLayout(controlsScrollContainer);
+
+  const footerContainer = findFooterContainer({ form, windowContent });
+  if (footerContainer instanceof HTMLElement) {
+    pinFooterContainer(footerContainer);
+    if (
+      controlsScrollContainer instanceof HTMLElement &&
+      controlsScrollContainer.contains(footerContainer)
+    ) {
+      footerContainer.style.position = "sticky";
+      footerContainer.style.bottom = "0";
+      footerContainer.style.zIndex = "1";
+      footerContainer.style.background = "var(--color-bg, var(--color-bg-alt, inherit))";
+    } else {
+      footerContainer.style.position = "relative";
+      footerContainer.style.zIndex = "1";
+    }
+  }
+
+  return Object.freeze({
+    controlsScrollContainer:
+      controlsScrollContainer instanceof HTMLElement ? controlsScrollContainer : null,
+    footerContainer,
+    windowContent: windowContent instanceof HTMLElement ? windowContent : null,
+  });
+};
+
+const syncPinnedLayout = ({ form, controlsScrollContainer, footerContainer, windowContent }) => {
+  if (!(form instanceof HTMLElement)) return;
+
+  applyWindowContentLayout(windowContent);
+  applyFormLayout(form);
+
+  if (footerContainer instanceof HTMLElement) {
+    pinFooterContainer(footerContainer);
+  }
+
+  syncControlsScrollHeight({ form, controlsScrollContainer, footerContainer });
+};
+
 const getDialogContent = () => {
   const presetOptions = PREDEFINED_TILE_COUNT_PRESETS.map(
     (preset) => `<option value="${preset.name}">${preset.name}</option>`,
   ).join("");
 
-  const rows = TILE_TYPES.map((type) => {
+  const getRows = (types) => types.map((type) => {
     const countName = `count-${type}`;
     const facedownName = `facedown-${type}`;
 
@@ -77,26 +237,41 @@ const getDialogContent = () => {
       </tr>
     `;
   }).join("");
+  const rows = getRows(TILE_TYPES);
 
   return `
-    <p>Choose how many cards of each type to include in the generated hand.</p>
-    <div class="form-group">
-      <label>Preset</label>
-      <select name="preset">
-        ${presetOptions}
-        <option value="${CUSTOM_PRESET_VALUE}">Custom</option>
-      </select>
+    <div class="infinite-dungeon-generate-content">
+      <p>Choose a preset for the generated hand.</p>
+      <div class="form-group">
+        <label>Preset</label>
+        <select name="preset">
+          ${presetOptions}
+          <option value="${CUSTOM_PRESET_VALUE}">Custom</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <a
+          class="infinite-dungeon-advanced-toggle"
+          data-action="toggle-advanced"
+          role="button"
+          aria-expanded="false"
+        >
+          Advanced
+        </a>
+      </div>
+      <div class="infinite-dungeon-advanced-fields" data-role="advanced-fields" hidden>
+        <table class="infinite-dungeon-tile-count-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Count</th>
+              <th>Face Down</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Count</th>
-          <th>Face Down</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
   `;
 };
 
@@ -121,6 +296,34 @@ export const openGenerateDungeonLevelDialog = async ({ sourceDeck, onSubmit }) =
     render: (event, dialog) => {
       const form = dialog.element?.querySelector("form");
       if (!form) return;
+      dialog.element?.classList.add("infinite-dungeon-generate-dialog");
+      form.classList.add("infinite-dungeon-generate-form");
+
+      const advancedToggle = form.querySelector(ADVANCED_TOGGLE_SELECTOR);
+      const advancedFields = form.querySelector(ADVANCED_FIELDS_SELECTOR);
+      const pinnedLayout = applyPinnedButtonsScrollableControlsLayout(form);
+      const setAdvancedVisibility = (isVisible) => {
+        if (!advancedToggle || !advancedFields) return;
+        advancedFields.hidden = !isVisible;
+        advancedToggle.setAttribute("aria-expanded", String(isVisible));
+        advancedToggle.textContent = isVisible ? "Hide advanced" : "Advanced";
+      };
+      setAdvancedVisibility(false);
+      applyFixedDialogSize(dialog);
+      requestAnimationFrame(() => syncPinnedLayout({ form, ...pinnedLayout }));
+      advancedToggle?.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (!advancedFields) return;
+        const isNextVisible = advancedFields.hidden;
+        setAdvancedVisibility(isNextVisible);
+        requestAnimationFrame(() => {
+          syncPinnedLayout({ form, ...pinnedLayout });
+          if (isNextVisible && pinnedLayout.controlsScrollContainer) {
+            const targetTop = Math.max(0, advancedFields.offsetTop - 8);
+            pinnedLayout.controlsScrollContainer.scrollTop = targetTop;
+          }
+        });
+      });
 
       const selectElement = form.elements.preset;
       if (DEFAULT_PRESET) {

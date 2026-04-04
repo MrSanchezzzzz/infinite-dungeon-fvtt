@@ -51,6 +51,20 @@ const rerenderHud = (hudApplication) => {
   }
 };
 
+const bindToggleStateHandler = ({ button, toggleAction, card, sceneId, hudApplication }) => {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    void toggleAction(card, sceneId)
+      .then(() => {
+        applyTileVisitVisualForCard(card, sceneId);
+        rerenderHud(hudApplication);
+      })
+      .catch(notifyUpdateError);
+  });
+};
+
 const addTileVisitControls = (hudApplication) => {
   const hudRoot = hudApplication.element;
   if (!hudRoot) return;
@@ -86,28 +100,19 @@ const addTileVisitControls = (hudApplication) => {
     variant: `${CONTROL_BUTTON_CLASS}--occupied`,
   });
 
-  visitedButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    void toggleVisited(card, sceneId)
-      .then(() => {
-        applyTileVisitVisualForCard(card, sceneId);
-        rerenderHud(hudApplication);
-      })
-      .catch(notifyUpdateError);
+  bindToggleStateHandler({
+    button: visitedButton,
+    toggleAction: toggleVisited,
+    card,
+    sceneId,
+    hudApplication,
   });
-
-  occupiedButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    void toggleOccupied(card, sceneId)
-      .then(() => {
-        applyTileVisitVisualForCard(card, sceneId);
-        rerenderHud(hudApplication);
-      })
-      .catch(notifyUpdateError);
+  bindToggleStateHandler({
+    button: occupiedButton,
+    toggleAction: toggleOccupied,
+    card,
+    sceneId,
+    hudApplication,
   });
 
   controlsContainer.append(visitedButton, occupiedButton);

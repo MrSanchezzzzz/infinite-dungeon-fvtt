@@ -100,27 +100,23 @@ export const applyTileVisitVisualsForScene = (sceneId = canvas.scene?.id) => {
   }
 };
 
+const patchCardObjectRefreshMethod = (cardObjectPrototype, methodName) => {
+  const originalMethod = cardObjectPrototype[methodName];
+  cardObjectPrototype[methodName] = function (...args) {
+    if (typeof originalMethod === "function") {
+      originalMethod.call(this, ...args);
+    }
+    applyTileVisitVisualForCard(this.document?.card, this.scene?.id ?? canvas.scene?.id);
+  };
+};
+
 export const registerTileVisitVisualPatches = () => {
   const CardObject = globalThis.ccm?.canvas?.CardObject;
   if (!CardObject?.prototype) return false;
   if (CardObject.prototype[PATCH_FLAG]) return true;
 
-  const originalRefreshState = CardObject.prototype._refreshState;
-  const originalRefreshFrame = CardObject.prototype._refreshFrame;
-
-  CardObject.prototype._refreshState = function (...args) {
-    if (typeof originalRefreshState === "function") {
-      originalRefreshState.call(this, ...args);
-    }
-    applyTileVisitVisualForCard(this.document?.card, this.scene?.id ?? canvas.scene?.id);
-  };
-
-  CardObject.prototype._refreshFrame = function (...args) {
-    if (typeof originalRefreshFrame === "function") {
-      originalRefreshFrame.call(this, ...args);
-    }
-    applyTileVisitVisualForCard(this.document?.card, this.scene?.id ?? canvas.scene?.id);
-  };
+  patchCardObjectRefreshMethod(CardObject.prototype, "_refreshState");
+  patchCardObjectRefreshMethod(CardObject.prototype, "_refreshFrame");
 
   CardObject.prototype[PATCH_FLAG] = true;
   return true;

@@ -26,3 +26,87 @@
 #card-hud .infinite-dungeon-tile-visit-button--occupied.is-active {
   box-shadow: inset 0 0 0 2px #ffd400;
 }
+
+.infinite-dungeon-generate-dialog .window-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.infinite-dungeon-generate-dialog .window-content > form {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.infinite-dungeon-generate-dialog .window-content > .dialog-buttons,
+.infinite-dungeon-generate-dialog .window-content > .window-footer,
+.infinite-dungeon-generate-dialog .window-content > footer {
+  margin-top: auto;
+  flex: 0 0 auto;
+}
+
+.infinite-dungeon-generate-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.infinite-dungeon-generate-form > .dialog-buttons,
+.infinite-dungeon-generate-form > .form-footer,
+.infinite-dungeon-generate-form > .window-footer,
+.infinite-dungeon-generate-form > footer,
+.infinite-dungeon-generate-form > menu {
+  margin-top: auto;
+  flex: 0 0 auto;
+}
+
+.infinite-dungeon-generate-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.infinite-dungeon-generate-content > p {
+  margin: 0;
+}
+
+.infinite-dungeon-generate-content > .form-group {
+  margin: 0;
+}
+
+.infinite-dungeon-advanced-toggle {
+  display: block;
+  width: 100%;
+  text-align: right;
+  color: var(--color-text-dark-secondary);
+  font-size: 12px;
+  line-height: 1.3;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.infinite-dungeon-advanced-toggle:visited {
+  color: var(--color-text-dark-secondary);
+}
+
+.infinite-dungeon-advanced-toggle:hover,
+.infinite-dungeon-advanced-toggle:focus-visible {
+  color: var(--infinite-dungeon-accent);
+}
+
+.infinite-dungeon-advanced-fields {
+  margin-top: 0;
+}
+
+.infinite-dungeon-tile-count-table {
+  width: 100%;
+  table-layout: fixed;
+}
